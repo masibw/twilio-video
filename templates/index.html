@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel = "stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+    </head>
+    <body>
+        <h1>Twilio Video Conference</h1>
+        <form>
+            <label for="username">Name:</label>
+            <input type="text" id="username" name="username">
+            <button id="join_leave">Join call</button>
+        </form>
+        <p id="count"></p>
+        <div id="container" class="container">
+            <div id="local" class="participant"><div></div><div>Me</div></div>
+        </div>
+
+        <script src="//media.twiliocdn.com/sdk/js/video/releases/2.3.0/twilio-video.min.js"></script>
+        <script src="{{ url_for('static', filename='app.js') }}"></script>
+    </body>
+</html>
