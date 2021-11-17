@@ -31,6 +31,7 @@ const connectButtonHandler = (event) => {
       });
   } else {
     disconnect();
+    displaySpeakRate();
     document.getElementById("join_leave").innerText = "Join call";
     connected = false;
   }
@@ -44,13 +45,18 @@ const connect = (username) =>
     })
       .then((res) => res.json())
       .then((data) => {
-        return Twilio.Video.connect(data.token);
+        return Twilio.Video.connect(data.token, {
+          dominantSpeaker: true,
+        });
       })
       .then((_room) => {
         room = _room;
         room.participants.forEach(participantConnected);
         room.on("participantConnected", participantConnected);
         room.on("participantDisconnected", participantDisconnected);
+        room.on("dominantSpeakerChanged", (participant) =>
+          dominantSpeaker(participant)
+        );
         connected = true;
         updateParticipantCount();
         resolve();
@@ -116,6 +122,30 @@ const disconnect = () => {
   connected = false;
   updateParticipantCount();
 };
+
+const dominantSpeaker = (participant) => {
+  fetch("/speaks", {
+    method: "POST",
+    body: JSON.stringify({
+      username: participant.identity,
+    }),
+  }).catch((err) => {
+    console.log(err);
+    reject();
+  });
+};
+
+const displaySpeakRate = () => {
+  fetch("/speaks")
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
 addLocalVideo();
 document
   .getElementById("join_leave")
