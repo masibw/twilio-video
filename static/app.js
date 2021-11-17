@@ -31,7 +31,7 @@ const connectButtonHandler = (event) => {
       });
   } else {
     disconnect();
-    connectButtonHandler.innerHtml = "Join call";
+    document.getElementById("join_leave").innerText = "Join call";
     connected = false;
   }
 };
