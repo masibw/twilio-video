@@ -23,6 +23,7 @@ const connectButtonHandler = (event) => {
       .then(() => {
         joinLeaveButton.innerText = "Leave call";
         joinLeaveButton.disabled = false;
+        document.getElementById("toggle_audio").disabled = false;
       })
       .catch(() => {
         alert("Could not connect to the room. Is the backend running?");
@@ -119,7 +120,11 @@ const disconnect = () => {
   while (container.lastChild.id != "local")
     container.removeChild(container.lastChild);
   document.getElementById("join_leave").setAttribute("innerHTML", "Join call");
+  document
+    .getElementById("toggle_audio")
+    .setAttribute("innerHTML", "Mute Audio");
   connected = false;
+  document.getElementById("toggle_audio").disabled = true;
   updateParticipantCount();
 };
 
@@ -146,7 +151,23 @@ const displaySpeakRate = () => {
     });
 };
 
+const muteAudioHandler = (event) => {
+  event.preventDefault();
+  room.localParticipant.audioTracks.forEach((publication) => {
+    if (publication.track.isEnabled) {
+      publication.track.disable();
+      document.getElementById("toggle_audio").innerHTML = "Unmute Audio";
+    } else {
+      publication.track.enable();
+      document.getElementById("toggle_audio").innerHTML = "Mute Audio";
+    }
+  });
+};
+
 addLocalVideo();
 document
   .getElementById("join_leave")
   .addEventListener("click", connectButtonHandler);
+document
+  .getElementById("toggle_audio")
+  .addEventListener("click", muteAudioHandler);
