@@ -10,12 +10,19 @@
             <input type="text" id="username" name="username">
             <button id="join_leave">Join call</button>
             <button id="toggle_audio" disabled>Mute Audio</button>
+            <button id="display_speak_rate_button" disabled>Display Speak Rate</button>
         </form>
         <p id="count"></p>
+        <div class="chart-container" style="position: relative; height:300px; width:300px">
+            <canvas id="display_speak_rate" height="300" width="300"></canvas>
+        </div>
         <div id="container" class="container">
             <div id="local" class="participant"><div></div><div>Me</div></div>
         </div>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.6.0/chart.min.js"
+            integrity="sha512-GMGzUEevhWh8Tc/njS0bDpwgxdCJLQBWG3Z2Ct+JGOpVnEmjvNx6ts4v6A2XJf1HOrtOsfhv3hBKpK9kE5z8AQ=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="//media.twiliocdn.com/sdk/js/video/releases/2.3.0/twilio-video.min.js"></script>
         <script src="{{ url_for('static', filename='app.js') }}"></script>
     </body>
