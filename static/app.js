@@ -1,5 +1,8 @@
+const wannaFinishButton = document.getElementById("wanna_finish_button");
+let wannaFinishCount = 1;
 let connected = false;
 let room;
+let dataTrack;
 
 const addLocalVideo = () => {
   Twilio.Video.createLocalVideoTrack().then((track) => {
@@ -23,6 +26,7 @@ const connectButtonHandler = (event) => {
       .then(() => {
         joinLeaveButton.innerText = "Leave call";
         joinLeaveButton.disabled = false;
+        wannaFinishButton.disabled = false;
       })
       .catch(() => {
         alert("Could not connect to the room. Is the backend running?");
@@ -48,6 +52,7 @@ const connect = (username) =>
       })
       .then((_room) => {
         room = _room;
+        room.localParticipant.publishTrack(dataTrack);
         room.participants.forEach(participantConnected);
         room.on("participantConnected", participantConnected);
         room.on("participantDisconnected", participantDisconnected);
@@ -100,11 +105,22 @@ const participantDisconnected = (participant) => {
 };
 
 const trackSubscribed = (div, track) => {
-  div.appendChild(track.attach());
+  if (track.kind === "data") {
+    track.on("message", (data) => {
+      addToWannaFinishPresenter(JSON.parse(data).message);
+      wannaFinishCount++;
+    });
+  } else {
+    div.appendChild(track.attach());
+  }
 };
 
 const trackUnsubscribed = (track) => {
-  track.detach().forEach((element) => element.remove());
+  if (track.kind === "data") {
+    document.getElementById("wanna_finish_presenter").innerHTML = "";
+  } else {
+    track.detach().forEach((element) => element.remove());
+  }
 };
 
 const disconnect = () => {
@@ -113,10 +129,35 @@ const disconnect = () => {
   while (container.lastChild.id != "local")
     container.removeChild(container.lastChild);
   document.getElementById("join_leave").setAttribute("innerHTML", "Join call");
+  wannaFinishButton.disabled = true;
   connected = false;
   updateParticipantCount();
 };
+
+const wannaFinishHandler = (event) => {
+  event.preventDefault();
+  addToWannaFinishPresenter(
+    `そろそろ終わりたいなぁと${wannaFinishCount}人が思っています`
+  );
+  sendDataToRoom(`そろそろ終わりたいなぁと${wannaFinishCount}人が思っています`);
+  wannaFinishButton.disabled = true;
+};
+
+const addToWannaFinishPresenter = (newText) => {
+  let presenter = document.getElementById("wanna_finish_presenter");
+  presenter.innerHTML = newText;
+};
+
+const addLocalData = () => {
+  dataTrack = new Twilio.Video.LocalDataTrack();
+};
+
+const sendDataToRoom = (data) => {
+  dataTrack.send(JSON.stringify({ message: data }));
+};
 addLocalVideo();
+addLocalData();
 document
   .getElementById("join_leave")
   .addEventListener("click", connectButtonHandler);
+wannaFinishButton.addEventListener("click", wannaFinishHandler);
